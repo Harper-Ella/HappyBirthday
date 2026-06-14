@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生日快乐 </title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            transition: background 1s ease;
+            background: linear-gradient(160deg, #8b0000, #5a0000);
+            background-size: 200% 200%;
+            animation: bgMove 12s ease infinite;
+            color: #fff;
+            padding: 20px;
+        }
+
+        @keyframes bgMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 40px 30px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .title {
+            text-align: center;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            opacity: 0.9;
+            margin-bottom: 40px;
+        }
+
+        .chars {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            justify-content: center;
+            margin-bottom: 35px;
+        }
+
+        .char-card {
+            width: 140px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .char-card:hover {
+            transform: translateY(-6px) scale(1.05);
+        }
+
+        .char-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #fff;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            margin-bottom: 10px;
+        }
+
+        .char-name {
+            font-size: 18px;
+        }
+
+        .quote-box {
+            background: rgba(0,0,0,0.25);
+            border-radius: 18px;
+            padding: 28px;
+            text-align: center;
+            min-height: 110px;
+            margin-bottom: 30px;
+            font-size: 17px;
+            line-height: 1.7;
+            font-style: italic;
+        }
+
+        .photo-box {
+            width: 100%;
+            border-radius: 18px;
+            overflow: hidden;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .photo-box img {
+            width: 100%;
+            display: block;
+        }
+
+        .wish-box {
+            background: rgba(255,255,255,0.08);
+            border-radius: 18px;
+            padding: 28px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .wish-title {
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+
+        .wish-content {
+            font-size: 16px;
+            line-height: 1.9;
+            opacity: 0.95;
+        }
+
+        .gacha-btn {
+            display: block;
+            margin: 0 auto 30px;
+            padding: 14px 40px;
+            border-radius: 50px;
+            border: none;
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            font-size: 18px;
+            cursor: pointer;
+            transition: 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .gacha-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+
+/* 遮罩层：全屏覆盖，默认隐藏，内部内容垂直+水平居中 */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.75);
+    display: none; /* 必须按按钮才显示 */
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    backdrop-filter: blur(8px);
+    padding: 20px;
+}
+
+/* 弹窗卡片：在遮罩里居中，允许垂直滚动 */
+.modal-box {
+    background: #fff;
+    color: #222;
+    border-radius: 20px;
+    max-width: 420px;
+    width: 100%;
+    max-height: 90vh; /* 弹窗最大高度为屏幕90% */
+    padding: 0;
+    text-align: center;
+    animation: pop 0.4s ease;
+    overflow-y: auto; /* 关键：开启垂直滚动条 */
+    display: flex;
+    flex-direction: column;
+}
+
+@keyframes pop {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+/* 卡面图片：完整展示，不裁切 */
+.modal-card-img {
+    width: 100%;
+    height: auto;
+    object-fit: contain; /* 完整显示整张卡面，不裁切 */
+    border-radius: 12px 12px 0 0;
+    margin: 0;
+    padding: 0;
+}
+
+/* 祝福语区域：完整展示文字 */
+.modal-text-area {
+    padding: 25px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.modal-title {
+    font-size: 22px;
+    color: #d4af37;
+    font-weight: 600;
+}
+
+.modal-desc {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #333;
+}
+
+.close {
+    padding: 10px 30px;
+    border-radius: 30px;
+    border: none;
+    background: #222;
+    color: #fff;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+
+       
+
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            animation: fall linear forwards;
+            z-index: -1;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-10px) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+
+        .music-btn {
+            position: fixed;
+            top: 20px; right: 20px;
+            width: 46px; height: 46px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            z-index: 99;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+
+<body>
+
+<button class="music-btn" onclick="toggleMusic()">🎵</button>
+
+<div class="container">
+    <h1 class="title">✨ 生日快乐 ✨</h1>
+    <p class="subtitle">陆沉 · 祁煜 · 罗夏 · 左慈 · 陆景和 · 专属祝福</p>
+
+    <div class="chars">
+        <div class="char-card" onclick="switchChar('luchen')">
+            <img class="char-avatar" src="./assets/images/luchentou.jpg">
+            <div class="char-name">陆沉</div>
+        </div>
+        <div class="char-card" onclick="switchChar('qiyu')">
+            <img class="char-avatar" src="./assets/images/qiyutou.jpg">
+            <div class="char-name">祁煜</div>
+        </div>
+        <div class="char-card" onclick="switchChar('luoxia')">
+            <img class="char-avatar" src="./assets/images/luoxiatou.jpg">
+            <div class="char-name">罗夏</div>
+        </div>
+        <div class="char-card" onclick="switchChar('zuoci')">
+            <img class="char-avatar" src="./assets/images/zuocitou.jpg">
+            <div class="char-name">左慈</div>
+        </div>
+        <div class="char-card" onclick="switchChar('lujinghe')">
+            <img class="char-avatar" src="./assets/images/lujinghetou.jpg">
+            <div class="char-name">陆景和</div>
+        </div>
+    </div>
+
+    <div class="quote-box" id="quote">点击角色，收听专属语音祝福 💌</div>
+
+    <div class="photo-box">
+        <img src="./assets/images/photo.jpg" alt="生日照片">
+    </div>
+
+    <div class="wish-box">
+        <h3 class="wish-title">💌 我的专属祝福</h3>
+        <div class="wish-content">
+            愿你新的一岁被温柔与偏爱包围。<br>
+            平安喜乐，万事胜意，我会一直陪着你 ✨
+        </div>
+    </div>
+
+    <button class="gacha-btn" onclick="openGacha()">🎁 抽取生日SSR祝福</button>
+</div>
+
+<div class="modal" id="modal">
+    <div class="modal-box">
+        <img id="gachaCard" class="modal-card-img">
+        <div class="modal-text-area">
+            <h2 class="modal-title" id="modalTitle">SSR · 祝福</h2>
+            <p class="modal-desc" id="modalDesc">祝福内容</p>
+            <button class="close" onclick="closeModal()">收下祝福</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 背景音乐
+    const bgm = new Audio('./assets/audio/bgm.mp3');
+    bgm.loop = true;
+    bgm.volume = 0.3;
+    let bgmPlay = false;
+
+    function toggleMusic() {
+        bgmPlay = !bgmPlay;
+        bgmPlay ? bgm.play() : bgm.pause();
+    }
+
+    // 语音
+    const voice = {
+        luchen: new Audio('./assets/audio/luchen.mp3'),
+        qiyu: new Audio('./assets/audio/qiyu.mp3'),
+        luoxia: new Audio('./assets/audio/luoxia.mp3'),
+        zuoci: new Audio('./assets/audio/zuoci.mp3'),
+        lujinghe: new Audio('./assets/audio/lujinghe.mp3')
+    };
+    Object.values(voice).forEach(v => v.volume = 0.8);
+    let currentVoice = null;
+
+    // 角色数据 + 主题色
+    const charData = {
+        luchen: { bg: "linear-gradient(160deg, #8b0000, #5a0000)", quote: "我总觉得，生日在庆祝你的出生之外，还有很重要的另一层作用—庆祝此时此刻，你的存在。", effect: "🌹" },
+        qiyu: { bg: "linear-gradient(160deg, #4a3b98, #2c2260)", quote: "我开始对你产生意义了。", effect: "🌊" },
+        luoxia: { bg: "linear-gradient(160deg, #f5b041, #e67e22)", quote: "能否将你比作夏日，你比夏日更可爱温柔。", effect: "🔥" },
+        zuoci: { bg: "linear-gradient(160deg, #2c5c54, #1a3d38)", quote: "惟愿一人，长生久视，如日之升，如月之恒", effect: "❀" },
+        lujinghe: { bg: "linear-gradient(160deg, #2980b9, #1f618d)", quote: "我想送给你的，永远都是我所能给出的最大的陪伴和快乐。", effect: "✨" }
+    };
+
+    function switchChar(key) {
+        if (currentVoice) { currentVoice.pause(); currentVoice.currentTime = 0; }
+        currentVoice = voice[key];
+        currentVoice.play().catch(e=>{});
+        const data = charData[key];
+        document.body.style.background = data.bg;
+        document.getElementById("quote").innerText = data.quote;
+        createEffect(30, data.effect);
+    }
+
+    // 特效
+    function createEffect(num, emoji) {
+        for(let i=0;i<num;i++){
+            const p=document.createElement("div");
+            p.className="particle";
+            p.innerText=emoji;
+            p.style.left=Math.random()*100+"vw";
+            p.style.fontSize=16+Math.random()*12+"px";
+            p.style.animationDuration=3+Math.random()*4+"s";
+            document.body.appendChild(p);
+            setTimeout(()=>p.remove(),6000);
+        }
+    }
+
+    // 抽卡
+    const gachaList = [
+        { name:"陆沉 · 永恒偏爱", desc:"愿你被世界温柔以待，我永远是你最坚实的依靠。", img:"luchenka.jpg", char:"luchen" },
+        { name:"祁煜 · 深海誓约", desc:"星辰大海为证，我会永远奔赴向你。", img:"qiyuka.jpg", char:"qiyu" },
+        { name:"罗夏 · 炽热真心", desc:"我的一切都属于你，生日快乐，我的唯一。", img:"luoxiaka.jpg", char:"luoxia" },
+        { name:"左慈 · 仙尊守护", desc:"岁岁平安，年年欢喜，我护你一世无忧。", img:"zuocika.jpg", char:"zuoci" },
+        { name:"陆景和 · 坚定选择", desc:"无论时空变换，我永远坚定走向你，姐姐。", img:"lujingheka.jpg", char:"lujinghe" }
+    ];
+
+    function openGacha(){
+        const r = gachaList[Math.floor(Math.random()*gachaList.length)];
+        document.getElementById("modalTitle").innerText = "🎁 SSR · " + r.name;
+        document.getElementById("modalDesc").innerText = r.desc;
+        document.getElementById("gachaCard").src = "./assets/kamian/"+r.img;
+        document.getElementById("modal").style.display = "flex";
+        createEffect(50,"🎁");
+    }
+
+    function closeModal(){
+        document.getElementById("modal").style.display = "none";
+    }
+
+    window.onclick = function(e){
+        if(e.target === document.getElementById("modal")) closeModal();
+    }
+</script>
+</body>
+</html>
